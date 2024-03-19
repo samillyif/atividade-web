@@ -1,10 +1,16 @@
+// Importa o módulo express
 const express = require('express');
+// Inicializa o aplicativo express
 const app = express();
+// Define a porta em que o servidor vai rodar
 const PORTA = 4000;
 
+// Define o motor de visualização como EJS
 app.set('view engine', 'ejs');
+// Define a pasta 'public' como a pasta para arquivos estáticos
 app.use(express.static('public'));
 
+// Define um array de objetos representando o banco de dados de livros
 const livrosBD = [
   { id: 1, titulo: 'Dom Quixote', autor: 'Miguel de Cervantes', ano: 1605 },
   { id: 2, titulo: 'Guerra e Paz', autor: 'Liev Tolstói', ano: 1869 },
@@ -15,32 +21,36 @@ const livrosBD = [
   { id: 7, titulo: 'Harry Potter e a Pedra Filosofal', autor: ' J.K. Rowling ', ano:1997},
   { id: 8, titulo: 'A Culpa é das Estrelas', autor: 'John Green', ano:  2012 },
   { id: 9, titulo: 'A Garota no Trem', autor: 'Paula Hawkins', ano:  2015 },
-  { id: 10, titulo: 'O Diário de Anne Frank', autor: 'Anne Frank', ano:  1947 },
-
+  { id: 10, titulo: 'O Diário de Anne Frank', autor: 'Anne Frank', ano:  1947 }, 
 ];
 
+// Rota inicial que renderiza a página index.ejs com a lista de livros
 app.get('/', (req, res) => {
-  res.render('index', { livros: livrosBD, mensagem: null, resultados: null }); // Passando todos os livros e nenhum resultado para o template
+  res.render('index', { livros: livrosBD, mensagem: null, resultados: null });
 });
 
+// Rota para buscar livros por título
 app.get('/buscar', (req, res) => {
-  const { titulo, ano } = req.query;
+  // Extrai o parâmetro 'titulo' da query string da URL
+  const { titulo } = req.query;
+  // Inicializa um array para armazenar os resultados da busca
   let resultado = [];
   
+  // Verifica se foi fornecido um título para buscar
   if (titulo) {
-    const livroEncontrado = livrosBD.find(livro => livro.titulo && livro.titulo.toLowerCase().includes(titulo.toLowerCase()));
-    resultado = livroEncontrado ? [livroEncontrado] : []; // Se encontrar o livro, adiciona à lista de resultados
-  } else if (ano) {
-    resultado = livrosBD.filter(livro => livro.ano === parseInt(ano));
+    // Filtra os livros cujo título contenha o texto fornecido (case-insensitive)
+    resultado = livrosBD.filter(livro => livro.titulo.toLowerCase().includes(titulo.toLowerCase()));
   }
 
+  // Renderiza a página index.ejs com a lista de livros, mensagem de erro (se aplicável) e resultados da busca
   if (resultado.length === 0) {
-    res.render('index', { livros: livrosBD, mensagem: 'Nenhum livro encontrado para a busca realizada.', resultados: null }); // Passando todos os livros e nenhum resultado para o template
+    res.render('index', { livros: livrosBD, mensagem: 'Nenhum livro encontrado para a busca realizada.', resultados: null });
   } else {
-    res.render('index', { livros: livrosBD, mensagem: null, resultados: resultado }); // Passando todos os livros e os resultados da busca para o template
+    res.render('index', { livros: livrosBD, mensagem: null, resultados: resultado });
   }
 });
 
+// Inicia o servidor na porta especificada e exibe uma mensagem no console
 app.listen(PORTA, () => {
   console.log(`Servidor está rodando em http://localhost:${PORTA}`);
 });
